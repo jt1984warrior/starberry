@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="float-right m-5">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
+    <button type="button" class="btn btn-primary" id="clearPop" data-toggle="modal" data-target="#userModal">
                       Add User
                     </button>
 </div>
@@ -38,7 +38,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userModalLabel">Add User</h5>
+                    <h5 class="modal-title" id="userModalLabel">Add People</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -47,6 +47,7 @@
                     <div class="alert alert-danger" style="display:none"></div>
                     <form class="image-upload" method="post" action="{{ route('storeUser') }}"  id="userform" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="id" id="id" class="form-control"/>
                         <div class="form-group">
                             <label>Name</label>
                             <input type="text" name="name" id="name" class="form-control"/>
@@ -237,6 +238,40 @@ function deleteRow(id){
         });
 }
 
+function editRow(rowId)
+{
+   
+
+    $.ajax(
+    {
+        url: "/user/edit/"+rowId,
+        type: 'get', // replaced from put
+        dataType: "JSON",
+        data: {
+            "id": rowId ,// method and token not needed in data
+            "_token": "{{ csrf_token() }}",
+        },
+        success: function (response)
+        {
+            $("label.error").hide();
+  $(".error").removeClass("error");
+        
+        $("#userform input:not([type=button]):not([type=submit]):not([name=_token])").each(function(){
+            var id = $(this).attr('id');
+                $(this).val(response['result'][0][id]);
+            
+
+        });
+        //$("input[name=_token]").val(response.token);
+        $('#userModal').modal('show');
+        $('.modal-title').html('Edit People');
+        },
+        error: function(xhr) {
+
+         
+       }
+    });
+}
 var jconfirm = function (message, callback) {
     var options = {            
         message: message
@@ -259,6 +294,11 @@ var jconfirm = function (message, callback) {
     };
     bootbox.dialog(options);
 };
+
+$("#clearPop").click(function(){
+    $("#userform input:not([type=button]):not([type=submit]):not([name=_token])").val('');
+    $('.modal-title').html('Add People');
+});
 
 </script>
 @endsection

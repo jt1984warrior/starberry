@@ -22,3 +22,4 @@ Route::get('/users', 'UsersController@index');
 Route::get('/users_data', 'UsersController@getUserData')->name('userlist');
 Route::post('/storeUser', 'UsersController@store')->name('storeUser');
 Route::delete('/user/delete/{id}', 'UsersController@destroy');
+Route::get('/user/edit/{id}', 'UsersController@edit');

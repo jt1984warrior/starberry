@@ -11,6 +11,7 @@ use Session;
 use View;
 use Image;
 use Storage;
+
 class UsersController extends Controller
 {
     public function index(Request $request){
@@ -90,7 +91,7 @@ $data = array();
         return Datatables::of($userData)->addColumn('action', function($row){
        
             $btn = '';
-            $btn = $btn.' <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal">
+            $btn = $btn.' <button type="button" class="btn btn-primary" data-toggle="modal" onclick="editRow('.$row->id.')">
             Edit
           </button>';
             $btn = $btn.'<a href="javascript:void(0)" class="edit btn btn-danger btn-sm" onclick="deleteRow('.$row->id.')">Delete</a>';
@@ -106,10 +107,10 @@ $data = array();
     public function store(StoreUsers $request){
 
         try{
-        $input = $request->all();
-        Users::create($input);
-        
-Session::flash('success', 'People created successfully!');
+            $input = $request->except(['_token']);
+        Users::updateOrCreate(['id' => $input['id'] ?? ''],$input);
+        $saveOrUpdate = ($input['id'] == '') ? 'Created' : 'Updated';
+        Session::flash('success', 'People '.$saveOrUpdate.' successfully!');
         } catch(Throwable $e){
             Session::flash('error', 'Something went wrong!');
         }
@@ -122,5 +123,12 @@ Session::flash('success', 'People created successfully!');
         DB::table('people')->where('id', $id)->delete();
         Session::flash('success', 'People deleted successfully!');
         return View::make('flash-messages');
+    }
+
+    public function edit($id){
+$data['result'] = DB::table('people')->where('id', $id)->get();
+$data['token'] = csrf_token();
+        return json_encode($data);
+        
     }
 }
